@@ -1,0 +1,5 @@
+{
+    "keys": ["number", "age", "brand_name"],
+    "enableLocalLog": true,
+    "enableFileLog": false
+}
