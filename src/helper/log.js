@@ -3,22 +3,24 @@ const fs = require("fs");
 
 const { generateAndFetchId } = require("./debugIdGenerator");
 const { encryptData } = require("./encryption/encryptor");
+const { logLocalWriter, logServerWriter } = require('./logWriter');
 const config = require("../config/client-config");
 
 const DEBUG_ID_HEADER = "x-debud-id";
 let DEBUG_ID = "";
 let fileStream = null;
+let globalSource = null;
+let clientInfo = {};
 
 const logMiddleWare = (req, res, next) => {
-    let debugId = req.headers[DEBUG_ID_HEADER] || generateAndFetchId(req);
+    let debugId = res?.header[DEBUG_ID_HEADER] || req?.header[DEBUG_ID_HEADER] || generateAndFetchId(req);
 
     if (Array.isArray(debugId)) debugId = debugId[0];
-    req.debugId = debugId;
     DEBUG_ID = debugId;
 
     console.log(`Request received with Debug ID: ${debugId}`);
 
-    if (config?.enableLocalLog) {
+    if (config?.enableFileLog) {
         const logsDir = path.resolve("logs");
         if (!fs.existsSync(logsDir)) {
             fs.mkdirSync(logsDir);
@@ -27,6 +29,14 @@ const logMiddleWare = (req, res, next) => {
         fileStream = fs.createWriteStream(logFilePath, { flags: "a" });
     }
 
+    clientInfo = {
+        host: req?.headers?.host,
+        userAgent: req?.headers["user-agent"]
+    }
+
+    globalSource = config?.source || fetchSource(req);
+
+    req.headers.debugId = debugId;
     res.setHeader(DEBUG_ID_HEADER, debugId);
 
     res.on("finish", () => {
@@ -39,7 +49,17 @@ const logMiddleWare = (req, res, next) => {
     next();
 };
 
+const fetchSource = (req) => {
+    const source = config?.source || req.url.replaceAll("/", "_").replace("_", "");
+    return source;
+} 
+
 const logger = (level, key, payload, toBeEncrypted) => {
+    loggerWithSource(level, key, payload, globalSource, toBeEncrypted);
+};
+
+const loggerWithSource = (level, key, payload, source, toBeEncrypted) => {
+    const logTime = new Date();
     let payloadData = payload;
     if (typeof payload === "string") {
         payloadData = JSON.parse(JSON.stringify(payload));
@@ -52,19 +72,23 @@ const logger = (level, key, payload, toBeEncrypted) => {
         maskedData = payloadData;
     }
 
-    if (config?.enableLocalLog) {
-        console.log(DEBUG_ID, level, key, JSON.stringify(maskedData));
+
+    const logData = {
+        level,
+        key,
+        maskedData,
+        DEBUG_ID,
+        timestamp: logTime,
+        source,
+        clientInfo
     }
 
-    if (config?.enableLocalLog && fileStream) {
-        let message = `[${Date.now()}]-[${level}] - ${key} : ${JSON.stringify(
-            maskedData
-        )}\n`;
-        fileStream.write(message);
-    }
-};
+    logLocalWriter(fileStream, logData);
+    logServerWriter(logData);
+}
 
 module.exports = {
     logger,
+    loggerWithSource,
     logMiddleWare,
 };

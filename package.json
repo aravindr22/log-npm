@@ -1,18 +1,27 @@
 {
-  "name": "ar-log",
+  "name": "log-dispatcher",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon test.js"
   },
-  "author": "",
+  "keywords": [
+    "log",
+    "engine",
+    "nodejs",
+    "express"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aravindr22/log-npm.git"
+  },
+  "author": "Aravind R <aravind08222@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.1.0",
+    "axios": "^1.12.1",
     "fs": "^0.0.1-security",
-    "nodemon": "^3.1.10",
     "path": "^0.12.7"
   }
 }
