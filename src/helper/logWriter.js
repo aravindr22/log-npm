@@ -4,12 +4,12 @@ const config = require("../config/client-config");
 const { BASE_SERVER_URL } = require("../config/server-config");
 
 const logLocalWriter = (fileStream, logData) => {
-    if (config?.enableLocalLog) {
+    if (config?.enableLocalLog === true) {
         console.log(logData.DEBUG_ID, logData.source, logData.level, logData.key, JSON.stringify(logData.maskedData));
     }
 
 
-    if (config?.enableFileLog && fileStream) {
+    if (config?.enableFileLog === true && fileStream) {
         let message = `[${logData.DEBUG_ID}]-[${logData.source}]-[${logData.level}] - ${logData.key} : ${JSON.stringify(
             logData.maskedData
         )}\n`;

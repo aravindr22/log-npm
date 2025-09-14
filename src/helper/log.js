@@ -20,7 +20,7 @@ const logMiddleWare = (req, res, next) => {
 
     console.log(`Request received with Debug ID: ${debugId}`);
 
-    if (config?.enableFileLog) {
+    if (config?.enableFileLog === true) {
         const logsDir = path.resolve("logs");
         if (!fs.existsSync(logsDir)) {
             fs.mkdirSync(logsDir);
@@ -51,7 +51,7 @@ const logMiddleWare = (req, res, next) => {
 
 const fetchSource = (req) => {
     const source = config?.source || req.url.replaceAll("/", "_").replace("_", "");
-    return source;
+    return source.length > 0 ? source : config?.application_name ? config?.application_name : "unknown_source" ;
 } 
 
 const logger = (level, key, payload, toBeEncrypted) => {

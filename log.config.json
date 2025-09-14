@@ -1,7 +1,0 @@
-{
-    "keys": ["number", "age", "brand_name"],
-    "enableLocalLog": true,
-    "enableFileLog": false,
-    "enableConsoleLog": true,
-    "apiKey": "ff8c4cb92b4b2e4edbe4a763213c76faa398fd046e810e3b"
-}
